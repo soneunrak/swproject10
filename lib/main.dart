@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(MyApp());
@@ -13,11 +14,29 @@ class _MyAppState extends State<MyApp> {
   final List<String> messages = [];
   final TextEditingController _controller = TextEditingController();
 
-  void _sendMessage() {
-    final String message = _controller.text.trim();
-    if (message.isNotEmpty) {
+  Future<void> _sendMessage(String message) async {
+  final url = Uri.parse('http://localhost:8000/connect_flutter/api/messages/');
+  try {
+    final response = await http.post(
+      url,
+      body: {'content': message},
+    );
+    if (response.statusCode == 200) {
+      print('메세지 성공: $message'); // 메시지 출력
+    } else {
+      print('실패, Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('오류 메시지: $e');
+  }
+}
+
+
+  void _submitMessage(String text) {
+    if (text.isNotEmpty) {
+      _sendMessage(text);
       setState(() {
-        messages.add(message);
+        messages.add(text);
         _controller.clear();
       });
     }
@@ -28,52 +47,47 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          leading: const Icon(Icons.check_circle),
-          title: const Text('SWproject10'),
+          title: Text('SWproject10'),
           backgroundColor: Colors.blueGrey,
         ),
         body: Column(
           children: [
             Expanded(
-              child: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: messages.map((msg) {
-                    return Container(
-                      padding: const EdgeInsets.all(8),
-                      margin: const EdgeInsets.symmetric(vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blueGrey,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        msg,
-                        style: const TextStyle(color: Colors.white),
-                        textAlign: TextAlign.right,
-                      ),
-                    );
-                  }).toList(),
-                ),
+              child: ListView.builder(
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: EdgeInsets.all(8),
+                    margin: EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      messages[index],
+                      style: TextStyle(color: Colors.white),
+                      textAlign: TextAlign.right,
+                    ),
+                  );
+                },
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _controller,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: '메세지를 입력해주세요.',
                       ),
-                      onSubmitted: (_) => _sendMessage(),
+                      onSubmitted: _submitMessage,
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _sendMessage,
+                    icon: Icon(Icons.send),
+                    onPressed: () => _submitMessage(_controller.text),
                   ),
                 ],
               ),
@@ -84,4 +98,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-

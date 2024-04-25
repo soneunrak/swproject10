@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import Quiz
+from .models import Message
 
-class QuizSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Quiz
-        fields = ('title', 'body', 'answer')
+        model = Message
+        fields = ['content','created_at']

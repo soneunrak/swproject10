@@ -1,7 +1,6 @@
-from django.urls import path, include
-from .views import helloAPI, randomQuiz
+from django.urls import path
+from .views import MessageListAPI
 
 urlpatterns = [
-    path("hello/", helloAPI),
-    path("<int:id>/", randomQuiz),
+    path('api/messages/', MessageListAPI.as_view(), name='message_list'),
 ]

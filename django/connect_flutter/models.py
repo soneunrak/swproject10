@@ -2,7 +2,9 @@ from django.db import models
 
 # Create your models here.
 
-class Quiz(models.Model):
-    title = models.CharField(max_length=200)
-    body = models.TextField()
-    answer = models.IntegerField()
+class Message(models.Model):
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.content
