@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(MyApp());
@@ -13,40 +14,54 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final List<String> messages = [];
   final TextEditingController _controller = TextEditingController();
+  final String gptApiKey = '';
+  final String gptApiEndpoint = 'https://api.openai.com/v1/engines/gpt-3.5-turbo/completions'; // GPT API 엔드포인트
   String responseMessage = '';
 
   Future<void> _sendMessage(String message) async {
-    final url = Uri.parse('http://localhost:8000/connect_flutter/api/messages/');
-    try {
-      final response = await http.post(
-        url,
-        body: {'content': message},
-      );
-      if (response.statusCode == 200) {
-        print('메세지 성공: $message');
+  final url = Uri.parse('http://localhost:8000/connect_flutter/api/messages/');
+  try {
+    final response = await http.post(
+      url,
+      body: {'content': message},
+    );
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      print('메세지 성공: $message');
+      if (messages.isEmpty || messages.last != message) {
         setState(() {
           messages.add(message);
         });
-        _getBotResponse(message);
-      } else {
-        print('실패, Status code: ${response.statusCode}');
       }
-    } catch (e) {
-      print('오류 메시지: $e');
+      _getBotResponse(message);
+    } else {
+      print('실패, Status code: ${response.statusCode}');
     }
+  } catch (e) {
+    print('오류 메시지: $e');
   }
+}
 
   Future<void> _getBotResponse(String message) async {
-    // Replace 'YOUR_GPT_API_ENDPOINT' with the actual endpoint provided by GPT API
-    final gptApiUrl = Uri.parse('YOUR_GPT_API_ENDPOINT');
     try {
       final response = await http.post(
-        gptApiUrl,
-        body: {'message': message},
+        Uri.parse(gptApiEndpoint), // GPT API 엔드포인트 사용
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $gptApiKey'
+        },
+        body: jsonEncode({
+          'prompt': message,
+          'max_tokens': 1000,
+          'temperature': 0.7,
+        }),
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        // JSON 응답을 맵으로 디코딩
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        // 필요한 데이터 추출
+        final String botResponse = responseData['choices'][0]['text'];
         setState(() {
-          responseMessage = response.body;
+          responseMessage = botResponse;
           messages.add(responseMessage);
         });
       } else {
