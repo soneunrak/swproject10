@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import MessageListAPI
+from .views import MessageAPI
 
 urlpatterns = [
-    path('api/messages/', MessageListAPI.as_view(), name='message_list'),
+    path('api/messages/', MessageAPI.as_view(), name='message-list-create'),
 ]
