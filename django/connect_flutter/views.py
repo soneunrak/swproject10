@@ -5,7 +5,6 @@ from django.http import JsonResponse
 import openai
 
 openai.api_key = ''
-
 def gpt_send(prompt): 
     print(prompt) 
     query = openai.ChatCompletion.create( 
