@@ -1,0 +1,8 @@
+# 장고 실행
+python manage.py runserver
+
+# api key
+
+
+# 크롬으로 실행
+flutter run -d chrome

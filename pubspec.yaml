@@ -1,3 +1,5 @@
+# pubsec.yaml
+
 name: swproject
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
@@ -31,6 +33,8 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.0
+  speech_to_text: ^6.6.1 # stt구현을 위한 의존성
+  flutter_tts: ^3.2.2 # tts구현을 위한 의존성
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
