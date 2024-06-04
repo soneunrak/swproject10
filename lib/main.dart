@@ -4,17 +4,54 @@ import 'dart:convert';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'dart:async';
+import 'character_selection.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/': (context) => CharacterSelectionPage(
+              onCharacterSelected: (character, personality, speechStyle) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatPage(
+                      character: character,
+                      personality: personality,
+                      speechStyle: speechStyle,
+                    ),
+                  ),
+                );
+              },
+            ),
+        '/chat': (context) => ChatPage(
+              character: '',
+              personality: '',
+              speechStyle: '',
+            ),
+      },
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+class ChatPage extends StatefulWidget {
+  final String character;
+  final String personality;
+  final String speechStyle;
+
+  ChatPage({required this.character, required this.personality, required this.speechStyle});
+
+  @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
   final List<String> messages = [];
   final TextEditingController _controller = TextEditingController();
   late stt.SpeechToText _speech;
@@ -42,7 +79,7 @@ class _MyAppState extends State<MyApp> {
     try {
       final response = await http.post(
         messageUrl,
-        body: {'content': message},
+        body: {'content': message, 'personality': widget.personality, 'speechStyle': widget.speechStyle},
       );
       if (response.statusCode == 201) {
         print('메세지 성공: $message');
@@ -50,7 +87,7 @@ class _MyAppState extends State<MyApp> {
         final gptResponse = responseData['gpt_response'];
         setState(() {
           messages.add('사용자 : $message');
-          messages.add('GPT답변 : $gptResponse');
+          messages.add('${widget.character} : $gptResponse');
         });
         await _tts.speak(gptResponse); // GPT 답변 -> TTS
       } else {
@@ -70,119 +107,116 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _listen() async {
-  if (!_isListening) {
-    bool available = await _speech.initialize(
-      onStatus: (val) => print('onStatus: $val'),
-      onError: (val) => print('onError: $val'),
-    );
-    if (available) {
-      setState(() => _isListening = true);
-      _startTimer(); // 2초 말없으면 중지 타이머
-      _speech.listen(
-        onResult: (val) {
-          setState(() {
-            _speechText = val.recognizedWords;
-            _controller.text = _speechText;
-          });
-          _resetTimer(); // 타이머 리셋
-          if (val.finalResult) {
-            _submitMessage(_speechText); // 마이크 종료 채팅 전달
-            _stopListening();
-          }
-        },
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onStatus: $val'),
+        onError: (val) => print('onError: $val'),
       );
+      if (available) {
+        setState(() => _isListening = true);
+        _startTimer(); // 2초 말없으면 중지 타이머
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _speechText = val.recognizedWords;
+              _controller.text = _speechText;
+            });
+            _resetTimer(); // 타이머 리셋
+            if (val.finalResult) {
+              _submitMessage(_speechText); // 마이크 종료 채팅 전달
+              _stopListening();
+            }
+          },
+        );
+      }
+    } else {
+      _stopListening();
     }
-  } else {
-    _stopListening();
   }
-}
 
-void _startTimer() {
-  _timer = Timer(Duration(seconds: 2), () {
-    if (_isListening) {
-      _stopListening(); // 2초 동안 말 없으면 중지
-    }
-  });
-}
+  void _startTimer() {
+    _timer = Timer(Duration(seconds: 2), () {
+      if (_isListening) {
+        _stopListening(); // 2초 동안 말 없으면 중지
+      }
+    });
+  }
 
-void _resetTimer() {
-  _timer?.cancel(); // 타이머 취소
-  _startTimer(); // 타이머 재설정
-}
+  void _resetTimer() {
+    _timer?.cancel(); // 타이머 취소
+    _startTimer(); // 타이머 재설정
+  }
 
-void _stopListening() {
-  _speech.stop();
-  _timer?.cancel(); // 타이머 취소
-  setState(() {
-    _isListening = false;
-    _messageSubmitted = false;
-  });
-}
-
+  void _stopListening() {
+    _speech.stop();
+    _timer?.cancel(); // 타이머 취소
+    setState(() {
+      _isListening = false;
+      _messageSubmitted = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('SWproject10'),
-          backgroundColor: Colors.blueGrey,
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return Align(
-                    alignment: index % 2 == 0 ? Alignment.centerRight : Alignment.centerLeft,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      child: Container(
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: index % 2 == 0 ? Colors.blueGrey : Colors.green,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7,
-                        ),
-                        child: Text(
-                          messages[index],
-                          style: TextStyle(color: Colors.white),
-                        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('SW procjet 10 ${widget.character}'),
+        backgroundColor: Colors.blueGrey,
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                return Align(
+                  alignment: index % 2 == 0 ? Alignment.centerRight : Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: index % 2 == 0 ? Colors.blueGrey : Colors.green,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.7,
+                      ),
+                      child: Text(
+                        messages[index],
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-            Padding(
-              padding: EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: InputDecoration(
-                        hintText: '메세지를 입력해주세요.',
-                      ),
-                      onSubmitted: _submitMessage,
+          ),
+          Padding(
+            padding: EdgeInsets.all(8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: '메세지를 입력해주세요.',
                     ),
+                    onSubmitted: _submitMessage,
                   ),
-                  IconButton(
-                    icon: Icon(Icons.send),
-                    onPressed: () => _submitMessage(_controller.text),
-                  ),
-                  IconButton(
-                    icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
-                    onPressed: _listen,
-                  ),
-                ],
-              ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () => _submitMessage(_controller.text),
+                ),
+                IconButton(
+                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
+                  onPressed: _listen,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
