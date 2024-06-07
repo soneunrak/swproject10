@@ -1,4 +1,6 @@
 # 장고 실행
+.\venv\Scripts\activate
+cd django
 python manage.py runserver
 
 # api key
