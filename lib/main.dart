@@ -87,7 +87,7 @@ class _ChatPageState extends State<ChatPage> {
         final gptResponse = responseData['gpt_response'];
         setState(() {
           messages.add('사용자 : $message');
-          messages.add('${widget.character} : $gptResponse');
+          messages.add('답변: $gptResponse');
         });
         await _tts.speak(gptResponse); // GPT 답변 -> TTS
       } else {
@@ -160,7 +160,7 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('SW procjet 10 ${widget.character}'),
+        title: Text('SW 프로젝트 10 ${widget.character}'),
         backgroundColor: Colors.blueGrey,
       ),
       body: Column(
@@ -174,10 +174,17 @@ class _ChatPageState extends State<ChatPage> {
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                     child: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: index % 2 == 0 ? Colors.blueGrey : Colors.green,
                         borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 4),
+                            blurRadius: 4,
+                          ),
+                        ],
                       ),
                       constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.7,
@@ -201,16 +208,32 @@ class _ChatPageState extends State<ChatPage> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: '메세지를 입력해주세요.',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(color: Colors.blueGrey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     ),
                     onSubmitted: _submitMessage,
                   ),
                 ),
+                SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: Icon(Icons.send, color: Colors.blueGrey),
                   onPressed: () => _submitMessage(_controller.text),
                 ),
                 IconButton(
-                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
+                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none, color: Colors.blueGrey),
                   onPressed: _listen,
                 ),
               ],
