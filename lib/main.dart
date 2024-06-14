@@ -65,6 +65,7 @@ class _ChatPageState extends State<ChatPage> {
   String _speechText = '';
   bool _messageSubmitted = false;
   Timer? _timer;
+  FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
@@ -78,6 +79,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     _timer?.cancel();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -106,6 +108,7 @@ class _ChatPageState extends State<ChatPage> {
           messages.add('답변: $gptResponse');
         });
         await _tts.speak(gptResponse); // GPT 답변 -> TTS
+        _focusNode.requestFocus(); // 메시지 전송 후 포커스를 맞추기
       } else {
         print('메세지 실패, Status code: ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -228,6 +231,7 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 Expanded(
                   child: TextField(
+                    focusNode: _focusNode, // 포커스 노드 설정
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: '메세지를 입력해주세요.',

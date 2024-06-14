@@ -81,8 +81,8 @@ class CharacterSelectionPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(15),
         ),
         child: Container(
-          width: 205, // 카드의 너비를 넓게 설정
-          height: 320, // 카드의 높이를 늘려서 텍스트가 잘리지 않도록 설정
+          width: 220, // 카드의 너비를 넓게 설정
+          height: 340, // 카드의 높이를 늘려서 텍스트가 잘리지 않도록 설정
           padding: EdgeInsets.all(16.0), // 카드 내부의 패딩 설정
           child: Column(
             children: [
@@ -91,15 +91,15 @@ class CharacterSelectionPage extends StatelessWidget {
                 child: Image.asset(imagePath,
                     width: 150, height: 180, fit: BoxFit.cover), // 이미지 크기 확대
               ),
-              SizedBox(height: 7), // 이미지와 텍스트 사이의 간격
+              SizedBox(height: 8), // 이미지와 텍스트 사이의 간격
               Text(name,
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-              SizedBox(height: 7),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
               Text(personality,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600])),
               SizedBox(height: 4),
               Text(speechStyle,
-                  style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600])),
             ],
           ),
         ),
