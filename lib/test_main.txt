@@ -19,14 +19,13 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => CharacterSelectionPage(
-              onCharacterSelected: (character, personality, speechStyle) {
+              onCharacterSelected: (character, roleModel) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChatPage(
                       character: character,
-                      personality: personality,
-                      speechStyle: speechStyle,
+                      roleModel: roleModel,
                     ),
                   ),
                 );
@@ -34,8 +33,7 @@ class MyApp extends StatelessWidget {
             ),
         '/chat': (context) => ChatPage(
               character: '',
-              personality: '',
-              speechStyle: '',
+              roleModel: '',
             ),
       },
     );
@@ -44,13 +42,9 @@ class MyApp extends StatelessWidget {
 
 class ChatPage extends StatefulWidget {
   final String character;
-  final String personality;
-  final String speechStyle;
+  final String roleModel;
 
-  ChatPage(
-      {required this.character,
-      required this.personality,
-      required this.speechStyle});
+  ChatPage({required this.character, required this.roleModel});
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -71,8 +65,6 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     _speech = stt.SpeechToText();
     _tts = FlutterTts();
-    print(
-        'Character: ${widget.character}, Personality: ${widget.personality}, SpeechStyle: ${widget.speechStyle}');
   }
 
   @override
@@ -82,19 +74,15 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _sendMessage(String message) async {
-    final messageUrl =
-        Uri.parse('http://localhost:8000/connect_flutter/api/messages/');
+    final messageUrl = Uri.parse('http://127.0.0.1:8000/api/messages/');
     try {
-      print(
-          'Sending data: ${widget.character}, ${widget.personality}, ${widget.speechStyle}');
       final response = await http.post(
         messageUrl,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'content': message,
           'character': widget.character,
-          'personality': widget.personality,
-          'speechStyle': widget.speechStyle,
+          'role_model': widget.roleModel,
         }),
       );
       if (response.statusCode == 201) {
@@ -103,9 +91,9 @@ class _ChatPageState extends State<ChatPage> {
         final gptResponse = responseData['gpt_response'];
         setState(() {
           messages.add('사용자 : $message');
-          messages.add('답변: $gptResponse');
+          messages.add('${widget.character} : $gptResponse');
         });
-        await _tts.speak(gptResponse); // GPT 답변 -> TTS
+        await _tts.speak(gptResponse);
       } else {
         print('메세지 실패, Status code: ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -197,17 +185,10 @@ class _ChatPageState extends State<ChatPage> {
                   child: Padding(
                     padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
                     child: Container(
-                      padding: EdgeInsets.all(12),
+                      padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: index % 2 == 0 ? Colors.blueGrey : Colors.green,
                         borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            offset: Offset(0, 4),
-                            blurRadius: 4,
-                          ),
-                        ],
                       ),
                       constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.7,
@@ -231,34 +212,16 @@ class _ChatPageState extends State<ChatPage> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: '메세지를 입력해주세요.',
-                      filled: true,
-                      fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide(color: Colors.blueGrey),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                     ),
                     onSubmitted: _submitMessage,
                   ),
                 ),
-                SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.send, color: Colors.blueGrey),
+                  icon: Icon(Icons.send),
                   onPressed: () => _submitMessage(_controller.text),
                 ),
                 IconButton(
-                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none,
-                      color: Colors.blueGrey),
+                  icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
                   onPressed: _listen,
                 ),
               ],

@@ -24,6 +24,7 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/character1.jpg
-    - assets/character2.jpg
-    - assets/character3.jpg
+    - assets/Professor_Kim.webp
+    - assets/Innovator_Lee.webp
+    - assets/Trainer_Park.webp
+    - assets/personaselection.webp
