@@ -1,16 +1,27 @@
-# swproject
+# sw capstone project team 10
 
-A new Flutter project.
+## 🧠 Persona-Based Chatbot
 
-## Getting Started
+This project is a persona-based chatbot that allows users to interact with one of three unique characters, each with a distinct personality and style. The chatbot is designed to provide an engaging conversational experience tailored to the selected persona.
 
-This project is a starting point for a Flutter application.
+---
 
-A few resources to get you started if this is your first Flutter project:
+## 🚀 Features
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Three Unique Personas**:
+  - Each character has a distinct personality, dialogue style, and tone.
+- **Interactive Conversations**:
+  - Users can chat with the chosen character in real-time.
+- **Flexible Design**:
+  - Scalable architecture for adding more personas or features in the future.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## 🛠 Tech Stack
+
+- **Programming Languages**: Python, Dart
+- **Backend**: Flask  
+- **Frontend**: Flutter  
+- **API**: OpenAPI  
+
+---
